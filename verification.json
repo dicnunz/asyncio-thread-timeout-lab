@@ -1,0 +1,30 @@
+[
+  {
+    "python": "Python 3.11.13",
+    "tests_exit": 0,
+    "demo_exit": 0,
+    "tests": "test_cancelling_awaiter_leaves_started_thread_running (test_offload.OffloadTests.test_cancelling_awaiter_leaves_started_thread_running) ... ok\ntest_offload_preserves_context_arguments_and_result (test_offload.OffloadTests.test_offload_preserves_context_arguments_and_result) ... ok\ntest_pool_keeps_queued_cancelled_work_from_running (test_offload.OffloadTests.test_pool_keeps_queued_cancelled_work_from_running) ... ok\ntest_semaphore_releases_capacity_before_thread_finishes (test_offload.OffloadTests.test_semaphore_releases_capacity_before_thread_finishes) ... ok\ntest_timeout_leaves_started_thread_running (test_offload.OffloadTests.test_timeout_leaves_started_thread_running) ... ok\ntest_worker_exception_reaches_caller (test_offload.OffloadTests.test_worker_exception_reaches_caller) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.026s\n\nOK\n",
+    "demo": "Semaphore(1) + to_thread: peak active calls = 2\nThreadPoolExecutor(1):    peak active calls = 1\n"
+  },
+  {
+    "python": "Python 3.12.11",
+    "tests_exit": 0,
+    "demo_exit": 0,
+    "tests": "test_cancelling_awaiter_leaves_started_thread_running (test_offload.OffloadTests.test_cancelling_awaiter_leaves_started_thread_running) ... ok\ntest_offload_preserves_context_arguments_and_result (test_offload.OffloadTests.test_offload_preserves_context_arguments_and_result) ... ok\ntest_pool_keeps_queued_cancelled_work_from_running (test_offload.OffloadTests.test_pool_keeps_queued_cancelled_work_from_running) ... ok\ntest_semaphore_releases_capacity_before_thread_finishes (test_offload.OffloadTests.test_semaphore_releases_capacity_before_thread_finishes) ... ok\ntest_timeout_leaves_started_thread_running (test_offload.OffloadTests.test_timeout_leaves_started_thread_running) ... ok\ntest_worker_exception_reaches_caller (test_offload.OffloadTests.test_worker_exception_reaches_caller) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.027s\n\nOK\n",
+    "demo": "Semaphore(1) + to_thread: peak active calls = 2\nThreadPoolExecutor(1):    peak active calls = 1\n"
+  },
+  {
+    "python": "Python 3.13.1",
+    "tests_exit": 0,
+    "demo_exit": 0,
+    "tests": "test_cancelling_awaiter_leaves_started_thread_running (test_offload.OffloadTests.test_cancelling_awaiter_leaves_started_thread_running) ... ok\ntest_offload_preserves_context_arguments_and_result (test_offload.OffloadTests.test_offload_preserves_context_arguments_and_result) ... ok\ntest_pool_keeps_queued_cancelled_work_from_running (test_offload.OffloadTests.test_pool_keeps_queued_cancelled_work_from_running) ... ok\ntest_semaphore_releases_capacity_before_thread_finishes (test_offload.OffloadTests.test_semaphore_releases_capacity_before_thread_finishes) ... ok\ntest_timeout_leaves_started_thread_running (test_offload.OffloadTests.test_timeout_leaves_started_thread_running) ... ok\ntest_worker_exception_reaches_caller (test_offload.OffloadTests.test_worker_exception_reaches_caller) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.025s\n\nOK\n",
+    "demo": "Semaphore(1) + to_thread: peak active calls = 2\nThreadPoolExecutor(1):    peak active calls = 1\n"
+  },
+  {
+    "python": "Python 3.14.6",
+    "tests_exit": 0,
+    "demo_exit": 0,
+    "tests": "test_cancelling_awaiter_leaves_started_thread_running (test_offload.OffloadTests.test_cancelling_awaiter_leaves_started_thread_running) ... ok\ntest_offload_preserves_context_arguments_and_result (test_offload.OffloadTests.test_offload_preserves_context_arguments_and_result) ... ok\ntest_pool_keeps_queued_cancelled_work_from_running (test_offload.OffloadTests.test_pool_keeps_queued_cancelled_work_from_running) ... ok\ntest_semaphore_releases_capacity_before_thread_finishes (test_offload.OffloadTests.test_semaphore_releases_capacity_before_thread_finishes) ... ok\ntest_timeout_leaves_started_thread_running (test_offload.OffloadTests.test_timeout_leaves_started_thread_running) ... ok\ntest_worker_exception_reaches_caller (test_offload.OffloadTests.test_worker_exception_reaches_caller) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.027s\n\nOK\n",
+    "demo": "Semaphore(1) + to_thread: peak active calls = 2\nThreadPoolExecutor(1):    peak active calls = 1\n"
+  }
+]
