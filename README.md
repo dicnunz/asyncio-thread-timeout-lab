@@ -36,6 +36,32 @@ This makes the observation stronger than measuring a few sleep durations: both b
 
 The test suite separately checks `asyncio.wait_for`. It waits until the worker starts, applies a short timeout, then verifies that the worker still has not finished. The small timeout triggers cancellation; it is not used to guess whether the thread started.
 
+## Export the measured timeline
+
+Save a standalone HTML report and the events behind it with the same command:
+
+```sh
+python3 demo.py --report artifacts/report.html --trace artifacts/events.json
+```
+
+Open `artifacts/report.html` in a browser. It compares the two scenarios side by side on wide screens and stacks them on narrow screens. Each call has an awaiter lane and a worker lane; the orange segment shows the first blocking call continuing after its awaiter was cancelled. Expand either event ledger to inspect every recorded transition. The file contains its own styles and needs no server, JavaScript, network access, or third-party packages.
+
+Both flags are optional and can be used independently. Parent directories are created as needed. The default two console lines stay the same, and generated files in `artifacts/` are ignored by Git. Every invocation records a fresh experiment; using both flags exports the same run in both formats.
+
+The timestamps are actual `time.perf_counter_ns()` readings, serialized under a lock. Each scenario has its own zero point, and both charts use the same time scale. These short, event-coordinated runs include scheduling and tracing overhead, so their durations are not a performance comparison. A worker lane measures the blocking function's execution, not the longer lifetime of an executor thread.
+
+The JSON format has `schema_version: 1`, UTC generation time, Python runtime metadata, clock and unit names, and a `scenarios` array. Each scenario includes its label, measured peak, and ordered events:
+
+| Event field | Meaning |
+| --- | --- |
+| `sequence` | One-based order within this scenario |
+| `elapsed_ns` | Integer nanoseconds since this scenario's first event |
+| `kind` | Lifecycle transition, such as `awaiter_cancelled` or `worker_finished` |
+| `call` | Call `1` or `2`, or `null` for a scenario-wide event |
+| `active_calls` | Active blocking calls at this transition |
+
+The demo drains the cancelled caller's worker through its separate finish signal before exporting. This keeps the final worker completion in the trace even though its original awaiter has already ended. The collector and HTML renderer are in [trace_report.py](trace_report.py).
+
 ## Follow the cancellation
 
 There are five steps:
@@ -85,4 +111,6 @@ My check for this class of bug is simple: after cancelling the caller, inspect t
 
 ## Verification
 
-Six tests cover running-thread cancellation, real timeout behavior, semaphore overlap, queued cancellation, context and argument propagation, and worker exceptions. All six tests and the demo passed on CPython 3.11.13, 3.12.11, 3.13.1, and 3.14.6 on macOS arm64. See [test_offload.py](test_offload.py), [demo.py](demo.py), and the [captured results](verification.json).
+The original six tests cover running-thread cancellation, real timeout behavior, semaphore overlap, queued cancellation, context and argument propagation, and worker exceptions. The [captured results](verification.json) record those six tests and the original demo passing on CPython 3.11.13, 3.12.11, 3.13.1, and 3.14.6 on macOS arm64.
+
+Five more tests check complete, ordered event traces; agreement between JSON and HTML; escaped report text; unchanged default output; and conflicting output paths. All 11 tests and report generation passed locally on CPython 3.12.13 on Linux. That local check does not establish results for other Python versions. The [GitHub Actions workflow](.github/workflows/tests.yml) runs the suite and report generation on Python 3.11–3.14 when pushed. See [test_offload.py](test_offload.py) and [test_trace_report.py](test_trace_report.py).
