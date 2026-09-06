@@ -1,5 +1,7 @@
 # Why Semaphore(1) can leave two Python threads running
 
+[Inspect a recorded timeline](https://dicnunz.github.io/demos/asyncio/) · [Download its event trace (JSON)](https://dicnunz.github.io/demos/asyncio/events.json)
+
 I wanted to check whether a semaphore still limits blocking calls after an async timeout. I set its capacity to one, cancelled the first caller, and started another. Two worker threads stayed alive.
 
 That result matters when an async server wraps a blocking database client, file operation, or SDK. A request can time out while the operation it started continues using a connection or modifying data. Retrying adds another operation.
