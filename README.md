@@ -1,4 +1,4 @@
-# Why Semaphore(1) can leave two Python threads running
+# Threadwait
 
 [Inspect a recorded timeline](https://dicnunz.github.io/demos/asyncio/) · [Download its event trace (JSON)](https://dicnunz.github.io/demos/asyncio/events.json)
 
