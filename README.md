@@ -46,7 +46,7 @@ Save a standalone HTML report and the events behind it with the same command:
 python3 demo.py --report artifacts/report.html --trace artifacts/events.json
 ```
 
-Open `artifacts/report.html` in a browser. It compares the two scenarios side by side on wide screens and stacks them on narrow screens. Each call has an awaiter lane and a worker lane; the orange segment shows the first blocking call continuing after its awaiter was cancelled. Expand either event ledger to inspect every recorded transition. The file contains its own styles and needs no server, JavaScript, network access, or third-party packages.
+Open `artifacts/report.html` in a browser. It compares the two scenarios side by side on wide screens and stacks them on narrow screens. Each call has an awaiter lane and a worker lane; the orange segment shows the first blocking call continuing after its awaiter was cancelled. Expand either event ledger to inspect every recorded transition. Step through the recorded events or scrub the event slider to inspect each transition against the timeline. These controls do not rerun the experiment. The complete timeline and ledgers remain available without JavaScript. The file needs no server, network access, or third-party packages.
 
 Both flags are optional and can be used independently. Parent directories are created as needed. The default two console lines stay the same, and generated files in `artifacts/` are ignored by Git. Every invocation records a fresh experiment; using both flags exports the same run in both formats.
 

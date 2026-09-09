@@ -94,7 +94,7 @@ class ReportTests(unittest.TestCase):
                 self.external = []
 
             def handle_starttag(self, tag, attrs):
-                if tag in ("script", "link", "img", "iframe"):
+                if tag in ("link", "img", "iframe") or (tag == "script" and "src" in dict(attrs)):
                     self.external.append(tag)
 
         parser = Resources()

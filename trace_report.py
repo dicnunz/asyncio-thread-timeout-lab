@@ -142,7 +142,7 @@ def _scenario_html(scenario, number, maximum):
         + f" Peak active blocking calls: {peak}."
     )
     return f"""
-    <section class="scenario" aria-labelledby="scenario-{number}">
+    <section class="scenario" data-maximum="{maximum}" aria-labelledby="scenario-{number}">
       <div class="scenario-top"><span class="eyebrow">Scenario {number:02d}</span>
         <span class="peak {'overlap' if semaphore else 'bounded'}"><strong>{_text(peak)}</strong> peak active calls</span></div>
       <h2 id="scenario-{number}">{label}</h2>
@@ -189,6 +189,43 @@ details{border-top:1px solid var(--line);margin:0 -24px}summary{cursor:pointer;p
 """
 
 
+
+_SCRIPT = r"""
+<script>
+for (const scenario of document.querySelectorAll('.scenario')) {
+ const rows = [...scenario.querySelectorAll('tbody tr')];
+ const controls = document.createElement('div');
+ controls.className = 'event-inspector';
+ const label = document.createElement('label');
+ label.textContent = 'Recorded event ';
+ const slider = document.createElement('input');
+ slider.type = 'range'; slider.min = '0'; slider.max = String(rows.length - 1); slider.value = '0';
+ const output = document.createElement('output');
+ output.setAttribute('aria-live', 'polite');
+ const previous = document.createElement('button'); previous.textContent = 'Previous';
+ const next = document.createElement('button'); next.textContent = 'Next';
+ const note = document.createElement('p'); note.textContent = 'Inspect the recorded run. Controls do not rerun the experiment.';
+ label.append(slider); controls.append(label, previous, next, output, note);
+ scenario.querySelector('.finding').before(controls);
+ const cursors = [...scenario.querySelectorAll('.track')].map(track => {
+  const cursor = document.createElement('span'); cursor.className = 'event-cursor'; track.append(cursor); return cursor;
+ });
+ function show() {
+  const index = Number(slider.value), cells = rows[index].cells;
+  rows.forEach((row, i) => row.classList.toggle('selected-event', i === index));
+  output.textContent = 'Event ' + cells[0].textContent + ' · ' + cells[1].textContent + ' ms · ' + cells[2].textContent + ' · Call ' + cells[3].textContent + ' · ' + cells[4].textContent + ' active';
+  slider.setAttribute('aria-valuetext', output.textContent);
+  const position = Number(cells[1].textContent) * 1e6 / Number(scenario.dataset.maximum) * 100;
+  cursors.forEach(cursor => cursor.style.left = position + '%');
+  previous.disabled = index === 0; next.disabled = index === rows.length - 1;
+ }
+ previous.onclick = () => { slider.value = String(Number(slider.value) - 1); show(); };
+ next.onclick = () => { slider.value = String(Number(slider.value) + 1); show(); };
+ slider.oninput = show; show();
+}
+</script>
+"""
+
 def render_html(trace):
     """Render a completed experiment; all trace text is escaped as HTML."""
     maximum = max(event["elapsed_ns"] for scenario in trace["scenarios"] for event in scenario["events"])
@@ -203,7 +240,9 @@ def render_html(trace):
     return f"""<!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cancellation &amp; worker lifetime · Asyncio lab</title><style>{_STYLES}</style></head>
+<title>Cancellation &amp; worker lifetime · Asyncio lab</title><style>{_STYLES}
+.event-inspector{{border-top:1px solid var(--line);padding:16px 0}}.event-inspector label,.event-inspector output{{display:block}}.event-inspector input{{width:100%}}.event-inspector button{{font:inherit;margin:8px 8px 8px 0;padding:5px 10px}}.event-inspector output,.event-inspector p{{font-size:12px}}.event-cursor{{position:absolute;top:0;bottom:0;border-left:2px solid #202c26;pointer-events:none}}.selected-event{{background:#e8f2eb}}
+</style></head>
 <body><main class="shell">
   <div class="masthead"><div class="brand"><span aria-hidden="true">◈</span> Asyncio / thread timeout lab</div>
     <div class="run-tag">MEASURED RUN<br>{runtime_label}</div></div>
@@ -227,5 +266,5 @@ def render_html(trace):
   </section>
   <footer><span>Event coordinated · Python standard library · No external assets</span>
     <span>Recorded <time datetime="{generated}">{generated}</time></span></footer>
-</main></body></html>
+</main>{_SCRIPT}</body></html>
 """
