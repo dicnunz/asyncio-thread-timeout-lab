@@ -2,7 +2,7 @@
 
 [Inspect a recorded timeline](https://dicnunz.github.io/demos/asyncio/) · [Download its event trace (JSON)](https://dicnunz.github.io/demos/asyncio/events.json)
 
-I wanted to check whether a semaphore still limits blocking calls after an async timeout. I set its capacity to one, cancelled the first caller, and started another. Two worker threads stayed alive.
+A reproducible experiment showing why `Semaphore(1)` does not limit blocking calls to one after an async timeout. Cancelling the first caller releases its semaphore permit while its worker keeps running, allowing a second call to overlap.
 
 That result matters when an async server wraps a blocking database client, file operation, or SDK. A request can time out while the operation it started continues using a connection or modifying data. Retrying adds another operation.
 
@@ -16,7 +16,7 @@ async def limited_call(semaphore, blocking_call):
 
 It looks reasonable: acquire capacity, run the operation, release capacity. The catch is that the context manager follows the lifetime of the awaiting coroutine. A running thread has its own lifetime.
 
-## Reproduce it without guessing how long a thread takes
+## Run
 
 Run the included experiment with Python 3.11 or later. It uses only the standard library:
 
@@ -34,7 +34,7 @@ ThreadPoolExecutor(1):    peak active calls = 1
 
 The first worker signals an event when it starts, then waits for a release event. The experiment cancels its caller only after receiving that signal. The second worker gets its own start event. Neither worker finishes until the experiment releases it.
 
-This makes the observation stronger than measuring a few sleep durations: both blocking calls have reported that they started, and neither has been allowed to finish. A lock protects the active-worker count.
+Events coordinate the workers instead of relying on sleep durations. A lock protects the active-worker count.
 
 The test suite separately checks `asyncio.wait_for`. It waits until the worker starts, applies a short timeout, then verifies that the worker still has not finished. The small timeout triggers cancellation; it is not used to guess whether the thread started.
 
@@ -46,11 +46,11 @@ Save a standalone HTML report and the events behind it with the same command:
 python3 demo.py --report artifacts/report.html --trace artifacts/events.json
 ```
 
-Open `artifacts/report.html` in a browser. It compares the two scenarios on full-width timelines with one shared time scale. Each call has an awaiter lane and a worker lane; the orange segment shows the first blocking call continuing after its awaiter was cancelled. Expand either event ledger to inspect every recorded transition. Step through the recorded events or scrub the event slider to inspect each transition against the timeline. These controls do not rerun the experiment. The complete timeline and ledgers remain available without JavaScript. The file needs no server, network access, or third-party packages.
+Open `artifacts/report.html` in a browser. Separate awaiter and worker lanes show the blocking call continuing after cancellation. Step through events or scrub the timeline to inspect the recorded run. The standalone report needs no server or network; its complete timeline and event ledgers also work without JavaScript.
 
-Both flags are optional and can be used independently. Parent directories are created as needed. The default two console lines stay the same, and generated files in `artifacts/` are ignored by Git. Every invocation records a fresh experiment; using both flags exports the same run in both formats.
+Both flags are optional. Each invocation records a fresh experiment; using both flags exports the same run in both formats. Generated files in `artifacts/` are ignored by Git.
 
-The timestamps are actual `time.perf_counter_ns()` readings, serialized under a lock. Each scenario has its own zero point, and both charts use the same time scale. These short, event-coordinated runs include scheduling and tracing overhead, so their durations are not a performance comparison. A worker lane measures the blocking function's execution, not the longer lifetime of an executor thread.
+Timestamps use `time.perf_counter_ns()`, serialized under a lock. Each scenario starts at zero on the shared time scale. Durations include scheduling and tracing overhead and are not a performance comparison. Worker lanes measure blocking calls, not executor thread lifetimes.
 
 The JSON format has `schema_version: 1`, UTC generation time, Python runtime metadata, clock and unit names, and a `scenarios` array. Each scenario includes its label, measured peak, and ordered events:
 
@@ -62,7 +62,7 @@ The JSON format has `schema_version: 1`, UTC generation time, Python runtime met
 | `call` | Call `1` or `2`, or `null` for a scenario-wide event |
 | `active_calls` | Active blocking calls at this transition |
 
-The demo drains the cancelled caller's worker through its separate finish signal before exporting. This keeps the final worker completion in the trace even though its original awaiter has already ended. The collector and HTML renderer are in [trace_report.py](trace_report.py).
+The demo waits for both workers to finish before exporting. The collector and HTML renderer are in [trace_report.py](trace_report.py).
 
 ## Follow the cancellation
 
@@ -80,7 +80,7 @@ Increasing the semaphore's capacity does not remove this mismatch. Repeated time
 
 ## Put the execution limit on a shared executor
 
-For a blocking integration that must run at most one call at a time, I would give that integration a shared executor with one worker:
+For an integration that must run at most one blocking call at a time, share a `ThreadPoolExecutor(max_workers=1)` across calls:
 
 ```python
 import asyncio
@@ -108,8 +108,6 @@ A worker limit bounds running calls. The executor's submission queue still needs
 The blocking library also needs its own timeouts. `wait_for` lets an async caller stop waiting; it cannot force a blocking network call to release its socket. A cancelled write may still succeed, so retry decisions need an idempotency or reconciliation policy.
 
 Finally, pool shutdown waits for running work. Keep a shared pool alive for the service lifetime, and drain it during shutdown. Creating and closing it inside a request handler can make the event loop wait synchronously for the very operation that timed out.
-
-My check for this class of bug is simple: after cancelling the caller, inspect the resource doing the work. The useful limit belongs to that resource's lifetime.
 
 ## Verification
 
