@@ -186,6 +186,11 @@ details{border-top:1px solid var(--line);margin:0 -24px}summary{cursor:pointer;p
 @media(max-width:980px){.comparison{grid-template-columns:1fr}.scenario-description{min-height:0;max-width:none}.timeline{margin-top:10px}.shell{max-width:760px;padding:28px 24px}header{padding-top:35px}.method{gap:24px}}
 @media(max-width:540px){.shell{padding:20px 16px}.masthead{align-items:flex-start;gap:12px;padding-bottom:20px}.brand{font-size:13px}.run-tag{font-size:10px;max-width:145px}header{padding-top:28px}.intro{font-size:15px}.reading-guide{gap:9px 14px;font-size:11px}.scenario{padding:20px 16px 0}.scenario-top{gap:8px}.eyebrow{font-size:10px}.peak{font-size:10px;padding:3px 6px}h2{font-size:20px}.lane{grid-template-columns:91px minmax(0,1fr)}.axis{margin-left:91px}.lane-label{font-size:11px}.lane-label small{font-size:10px}.method{grid-template-columns:1fr;gap:22px}details{margin:0 -16px}summary{padding:15px 16px}.finding p{font-size:12px}}
 @media print{body{background:white}.shell{max-width:none;padding:0}header{padding-top:25px}h1{font-size:34px}.scenario{break-inside:avoid}.comparison{grid-template-columns:1fr 1fr;gap:12px}.run-tag{font-size:10px}.method{margin-top:15px}details{display:none}}
+
+/* Shared axes and aligned rows keep the measured comparison legible. */
+:root{--ink:#242622;--muted:#5b6059;--paper:#fafaf8;--line:#d5d9d1;--await:#397f78;--work:#334f6a;--after:#b24b25}
+body{font-family:Helvetica,Arial,sans-serif}.shell{max-width:1240px;padding:30px 44px}.masthead{padding-bottom:16px}.brand span{display:none}.brand{font-weight:500}.run-tag{font-size:12px}header{padding:28px 0 20px;max-width:1040px}.eyebrow{text-transform:none;letter-spacing:0;font-size:13px}h1{font-size:clamp(28px,3.4vw,42px);font-weight:500;letter-spacing:-.035em;margin:8px 0 14px;max-width:none}h1 br{display:none}h1 em{color:var(--ink)}.intro{font-size:16px;max-width:850px;line-height:1.5}.reading-guide{font-size:13px;padding:14px 0;border-top:1px solid var(--line);margin:0 0 6px}.comparison{display:block}.scenario{border:0;border-top:2px solid var(--ink);border-radius:0;background:transparent;padding:20px 0 0;margin-bottom:30px;overflow:visible}.scenario-top{float:right}.scenario-top .eyebrow{display:none}.peak{background:transparent!important;font-size:13px;padding:0}.peak strong{font-size:23px}h2{font-weight:500;margin:0 0 8px;font-size:25px}.scenario-description{min-height:0;max-width:760px;font-size:15px}.timeline{padding:20px 0 10px}.axis{margin-left:150px;font-size:12px}.lane{grid-template-columns:150px minmax(0,1fr);min-height:46px}.lane-label{font-size:13px;padding-top:6px}.lane-label small{font-size:11px}.bar{height:16px;top:10px;border-radius:0}.bar.continued{border-radius:0}.finding{padding:12px 0}.finding-mark{display:none}.finding p{font-size:14px}details{margin:0}summary{padding:13px 0;font-size:13px}.method{margin-top:0;padding-top:10px}.method p{font-size:14px}.method h2{font-size:16px}footer{font-size:12px}
+@media(max-width:600px){.shell{padding:20px}.scenario-top{float:none;margin:0 0 10px}.lane{grid-template-columns:100px minmax(0,1fr)}.axis{margin-left:100px;font-size:10px}.lane-label{font-size:12px}.scenario{padding-top:16px}header{padding-top:20px}.method{grid-template-columns:1fr}h2{font-size:22px}.reading-guide{gap:10px 15px}.run-tag{font-size:10px}}
 """
 
 
@@ -241,13 +246,13 @@ def render_html(trace):
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cancellation &amp; worker lifetime · Asyncio lab</title><style>{_STYLES}
-.event-inspector{{border-top:1px solid var(--line);padding:16px 0}}.event-inspector label,.event-inspector output{{display:block}}.event-inspector input{{width:100%}}.event-inspector button{{font:inherit;margin:8px 8px 8px 0;padding:5px 10px}}.event-inspector output,.event-inspector p{{font-size:12px}}.event-cursor{{position:absolute;top:0;bottom:0;border-left:2px solid #202c26;pointer-events:none}}.selected-event{{background:#e8f2eb}}
+.event-inspector{{border-top:1px solid var(--line);padding:12px 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px}}.event-inspector label{{flex:1;min-width:180px}}.event-inspector output{{flex-basis:100%;font-variant-numeric:tabular-nums}}.event-inspector p{{margin:0;color:var(--muted)}}.event-inspector label,.event-inspector output{{display:block}}.event-inspector input{{width:100%}}.event-inspector button{{font:inherit;margin:8px 8px 8px 0;padding:5px 10px}}.event-inspector output,.event-inspector p{{font-size:12px}}.event-cursor{{position:absolute;top:0;bottom:0;border-left:2px solid #202c26;pointer-events:none}}.selected-event{{background:#e8f2eb}}
 </style></head>
 <body><main class="shell">
   <div class="masthead"><div class="brand"><span aria-hidden="true">◈</span> Asyncio / thread timeout lab</div>
     <div class="run-tag">MEASURED RUN<br>{runtime_label}</div></div>
   <header><div class="eyebrow">Cancellation, observed</div>
-    <h1>The awaiter stops.<br><em>The worker keeps going.</em></h1>
+    <h1>The awaiter stops. <em>The worker keeps going.</em></h1>
     <p class="intro">A semaphore follows the awaiting coroutine. A shared executor limits concurrent blocking calls.
     These two experiments show where their lifetimes separate.</p></header>
   <div class="reading-guide" aria-label="Timeline legend">
